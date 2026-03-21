@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI House Price Recommendation System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Gradient -->
+    <div class="background-gradient"></div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-icon">🏠</div>
+                <h1 class="title">AI House Price Predictor</h1>
+            </div>
+            <p class="subtitle">Powered by Advanced Machine Learning</p>
+        </header>
+
+        <!-- Main Card -->
+        <div class="card">
+            <!-- Instructions -->
+            <div class="instructions">
+                <h2>💡 How to Use</h2>
+                <p>Fill in the house features below to get an instant price prediction. All fields are required for accurate results.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="predictionForm">
+                <div id="featuresContainer" class="features-grid">
+                    <!-- Features will be dynamically loaded here -->
+                    <div class="loading-features">
+                        <div class="spinner"></div>
+                        <p>Loading features...</p>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="button-container">
+                    <button type="submit" class="btn-predict" id="predictButton">
+                        <span class="btn-text">Predict Price</span>
+                        <span class="btn-icon">🚀</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- ============================= -->
+            <!--        RESULT DISPLAY         -->
+            <!-- ============================= -->
+            <div id="resultContainer" class="result-container hidden">
+
+                <!-- Original Predicted Price Card -->
+                <div class="result-card">
+                    <h3 class="result-title">Predicted House Price</h3>
+                    <div class="result-price" id="predictedPrice">$0</div>
+
+                    <!-- Price Category Badge -->
+                    <div class="price-category" id="priceCategory"></div>
+
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Model:</span>
+                            <span class="detail-value" id="modelName">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Confidence:</span>
+                            <span class="detail-value" id="confidence">-</span>
+                        </div>
+                        <div class="detail-item" id="locationImpactItem" style="display:none;">
+                            <span class="detail-label">Location Impact:</span>
+                            <span class="detail-value" id="locationImpact">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================= -->
+                <!--   NEW: RECOMMENDATION PANEL   -->
+                <!-- ============================= -->
+                <div class="rec-panel" id="recPanel">
+
+                    <!-- Card 1 — Recommended Price Range -->
+                    <div class="rec-card rec-range">
+                        <div class="rec-card-header">
+                            <span class="rec-icon">📊</span>
+                            <span class="rec-label">Recommended Price Range</span>
+                        </div>
+                        <div class="rec-range-values">
+                            <div class="range-bound">
+                                <span class="range-tag">Low</span>
+                                <span class="range-value" id="rangeLower">-</span>
+                            </div>
+                            <div class="range-divider">–</div>
+                            <div class="range-bound">
+                                <span class="range-tag">High</span>
+                                <span class="range-value" id="rangeUpper">-</span>
+                            </div>
+                        </div>
+                        <div class="range-bar-wrap">
+                            <div class="range-bar">
+                                <div class="range-bar-fill"></div>
+                                <div class="range-bar-dot" id="rangeBarDot" title="Predicted Price"></div>
+                            </div>
+                            <div class="range-bar-labels">
+                                <span id="rangeBarMin">-</span>
+                                <span>Predicted</span>
+                                <span id="rangeBarMax">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 — Market Insight -->
+                    <div class="rec-card rec-insight">
+                        <div class="rec-card-header">
+                            <span class="rec-icon">🏷️</span>
+                            <span class="rec-label">Market Insight</span>
+                        </div>
+                        <div class="insight-badge-wrap">
+                            <div class="insight-badge" id="insightBadge">
+                                <span id="insightIcon">🏠</span>
+                                <span id="insightText">-</span>
+                            </div>
+                        </div>
+                        <p class="insight-desc" id="insightDesc">-</p>
+                    </div>
+
+                    <!-- Card 3 — Suggestions -->
+                    <div class="rec-card rec-suggestions">
+                        <div class="rec-card-header">
+                            <span class="rec-icon">💡</span>
+                            <span class="rec-label">Suggestions</span>
+                        </div>
+                        <div class="suggestion-highlight" id="suggestionHighlight">
+                            <span id="suggestionIcon">✅</span>
+                            <span id="suggestionText">-</span>
+                        </div>
+                        <ul class="tips-list" id="tipsList"></ul>
+                    </div>
+
+                </div>
+                <!-- END RECOMMENDATION PANEL -->
+
+                <!-- Reset Button -->
+                <div class="reset-wrap">
+                    <button class="btn-reset" id="resetButton">
+                        🔄 Predict Another Price
+                    </button>
+                </div>
+
+            </div>
+            <!-- END Result Display -->
+
+            <!-- Error Display -->
+            <div id="errorContainer" class="error-container hidden">
+                <div class="error-card">
+                    <span class="error-icon">⚠️</span>
+                    <h3>Oops! Something went wrong</h3>
+                    <p id="errorMessage">Please try again.</p>
+                    <button class="btn-retry" id="retryButton">Try Again</button>
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay hidden">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Analyzing features...</p>
+                    <p class="loading-subtext">Predicting house price</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="featuresCount">-</div>
+                <div class="stat-label">Features Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🤖</div>
+                <div class="stat-value" id="modelType">-</div>
+                <div class="stat-label">ML Algorithm</div>
+                <div class="stat-accuracy">Accuracy: High (R² ≈ 0.85+)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value">< 1s</div>
+                <div class="stat-label">Prediction Speed</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by Machine Learning | Built with FastAPI & Modern Web Technologies</p>
+            <p class="footer-credits">© 2026 AI House Price Recommendation System</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/script.js"></script>
+</body>
+</html>
