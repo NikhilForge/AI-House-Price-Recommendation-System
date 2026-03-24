@@ -46,10 +46,8 @@ USER_INPUT_FEATURES = [
     'year_built',
     'basement_sqft',
     'basement_finish',
-    'kitchen_quality',
     'garage_type',
     'year_renovated',
-    'stories',
 ]
 
 LOCATION_TYPES = {
@@ -324,20 +322,6 @@ USER_FIELD_INFO = {
         'description': 'Basement finish level (HIGH IMPACT!)',
         'icon': '🔨'
     },
-    'kitchen_quality': {
-        'label': 'Kitchen Quality',
-        'type': 'select',
-        'options': [
-            {'value': 1, 'label': 'Poor - Outdated'},
-            {'value': 2, 'label': 'Fair - Basic'},
-            {'value': 3, 'label': 'Average - Functional'},
-            {'value': 4, 'label': 'Good - Modern Updates'},
-            {'value': 5, 'label': 'Excellent - High-End'},
-        ],
-        'default': 3,
-        'description': 'Kitchen condition (HIGH IMPACT!)',
-        'icon': '🍳'
-    },
     'garage_type': {
         'label': 'Garage Type',
         'type': 'select',
@@ -361,18 +345,6 @@ USER_FIELD_INFO = {
         'default': 2010,
         'description': 'Never? Use year built',
         'icon': '🔧'
-    },
-    'stories': {
-        'label': 'Number of Stories',
-        'type': 'select',
-        'options': [
-            {'value': 1, 'label': '1 Story'},
-            {'value': 2, 'label': '2 Stories'},
-            {'value': 3, 'label': '3 Stories'},
-        ],
-        'default': 2,
-        'description': 'How many floors?',
-        'icon': '🏢'
     },
 }
 
@@ -433,20 +405,22 @@ def map_user_input_to_model_features(user_input):
     location_type = user_input.get('location_type', 'suburban_standard')
     location_info = LOCATION_TYPES.get(location_type, LOCATION_TYPES['suburban_standard'])
 
-    overall_quality = int(user_input.get('overall_quality', 7))
-    overall_condition = int(user_input.get('overall_condition', 5))
-    house_style = user_input.get('house_style', 'two_story')
-    bedrooms = int(user_input.get('bedrooms', 3))
-    bathrooms = float(user_input.get('bathrooms', 2))
-    house_sqft = int(user_input.get('house_sqft', 1800))
-    lot_sqft = int(user_input.get('lot_sqft', 10000))
-    year_built = int(user_input.get('year_built', 2005))
-    basement_sqft = int(user_input.get('basement_sqft', 1000))
-    basement_finish = user_input.get('basement_finish', 'partial')
-    kitchen_quality = int(user_input.get('kitchen_quality', 3))
-    garage_type = user_input.get('garage_type', 'attached')
-    year_renovated = int(user_input.get('year_renovated', year_built))
-    stories = int(user_input.get('stories', 2))
+    overall_quality    = int(user_input.get('overall_quality', 7))
+    overall_condition  = int(user_input.get('overall_condition', 5))
+    house_style        = user_input.get('house_style', 'two_story')
+    bedrooms           = int(user_input.get('bedrooms', 3))
+    bathrooms          = float(user_input.get('bathrooms', 2))
+    house_sqft         = int(user_input.get('house_sqft', 1800))
+    lot_sqft           = int(user_input.get('lot_sqft', 10000))
+    year_built         = int(user_input.get('year_built', 2005))
+    basement_sqft      = int(user_input.get('basement_sqft', 1000))
+    basement_finish    = user_input.get('basement_finish', 'partial')
+    # kitchen_quality defaults to 3 (Average) — not shown in UI
+    kitchen_quality    = 3
+    garage_type        = user_input.get('garage_type', 'attached')
+    year_renovated     = int(user_input.get('year_renovated', year_built))
+    # stories defaults to 2 — not shown in UI
+    stories            = 2
 
     full_bath = int(bathrooms)
     half_bath = int((bathrooms % 1) * 2)
@@ -455,9 +429,9 @@ def map_user_input_to_model_features(user_input):
         'none': 0.0, 'unfinished': 0.0,
         'partial': 0.5, 'mostly': 0.75, 'full': 1.0
     }
-    finish_ratio = basement_finish_ratios.get(basement_finish, 0.5)
-    bsmt_fin_sf1 = int(basement_sqft * finish_ratio)
-    bsmt_unf_sf = int(basement_sqft * (1 - finish_ratio))
+    finish_ratio  = basement_finish_ratios.get(basement_finish, 0.5)
+    bsmt_fin_sf1  = int(basement_sqft * finish_ratio)
+    bsmt_unf_sf   = int(basement_sqft * (1 - finish_ratio))
 
     basement_finish_quality = {
         'none': 0, 'unfinished': 1,
@@ -495,39 +469,39 @@ def map_user_input_to_model_features(user_input):
         floor_2nd = int(house_sqft * 0.35)
 
     mappings = {
-        'Neighborhood': location_info['neighborhood_code'],
-        'OverallQual': overall_quality,
-        'OverallCond': overall_condition,
-        'KitchenQual': kitchen_quality,
-        'BedroomAbvGr': bedrooms,
-        'FullBath': full_bath,
-        'HalfBath': half_bath,
-        'GrLivArea': house_sqft,
-        'LotArea': lot_sqft,
-        'LotFrontage': int(lot_sqft ** 0.5),
-        'YearBuilt': year_built,
-        'YearRemodAdd': year_renovated,
-        'TotalBsmtSF': basement_sqft,
-        'BsmtFinSF1': bsmt_fin_sf1,
-        'BsmtUnfSF': bsmt_unf_sf,
-        'BsmtQual': bsmt_qual,
-        'BsmtFinType1': bsmt_qual,
-        'GarageYrBlt': year_built,
-        'GarageCars': garage_cars,
-        'GarageArea': garage_area,
-        'GarageType': garage_type_value,
-        'GarageQual': min(4, max(1, int(overall_quality / 2.5))) if garage_cars > 0 else 0,
-        'HouseStyle': house_style_value,
-        '1stFlrSF': floor_1st,
-        '2ndFlrSF': floor_2nd,
-        'TotRmsAbvGrd': bedrooms + 3,
-        'ExterQual': min(4, max(1, int(overall_quality / 2.5))),
-        'HeatingQC': min(4, max(1, int(overall_quality / 2.5))),
-        'TotalSF': house_sqft + basement_sqft,
-        'HouseAge': 2024 - year_built,
+        'Neighborhood':    location_info['neighborhood_code'],
+        'OverallQual':     overall_quality,
+        'OverallCond':     overall_condition,
+        'KitchenQual':     kitchen_quality,
+        'BedroomAbvGr':    bedrooms,
+        'FullBath':        full_bath,
+        'HalfBath':        half_bath,
+        'GrLivArea':       house_sqft,
+        'LotArea':         lot_sqft,
+        'LotFrontage':     int(lot_sqft ** 0.5),
+        'YearBuilt':       year_built,
+        'YearRemodAdd':    year_renovated,
+        'TotalBsmtSF':     basement_sqft,
+        'BsmtFinSF1':      bsmt_fin_sf1,
+        'BsmtUnfSF':       bsmt_unf_sf,
+        'BsmtQual':        bsmt_qual,
+        'BsmtFinType1':    bsmt_qual,
+        'GarageYrBlt':     year_built,
+        'GarageCars':      garage_cars,
+        'GarageArea':      garage_area,
+        'GarageType':      garage_type_value,
+        'GarageQual':      min(4, max(1, int(overall_quality / 2.5))) if garage_cars > 0 else 0,
+        'HouseStyle':      house_style_value,
+        '1stFlrSF':        floor_1st,
+        '2ndFlrSF':        floor_2nd,
+        'TotRmsAbvGrd':    bedrooms + 3,
+        'ExterQual':       min(4, max(1, int(overall_quality / 2.5))),
+        'HeatingQC':       min(4, max(1, int(overall_quality / 2.5))),
+        'TotalSF':         house_sqft + basement_sqft,
+        'HouseAge':        2024 - year_built,
         'YearsSinceRemod': 2024 - year_renovated,
-        'TotalBathrooms': full_bath + (half_bath * 0.5),
-        'TotalPorchSF': 150,
+        'TotalBathrooms':  full_bath + (half_bath * 0.5),
+        'TotalPorchSF':    150,
     }
 
     for feature, value in mappings.items():
@@ -542,55 +516,46 @@ def map_user_input_to_model_features(user_input):
 # ========================
 
 def compute_recommendations(price: float) -> dict:
-    """
-    Given predicted price P:
-      - range_lower = P * 0.9
-      - range_upper = P * 1.1
-      - market_insight based on price tier
-      - suggestion based on where P sits vs range
-    """
     lower = price * 0.9
     upper = price * 1.1
 
-    # Market insight
     if price < 150000:
         market_insight = "Budget Property"
-        market_icon = "🏚️"
-        market_color = "budget"
+        market_icon    = "🏚️"
+        market_color   = "budget"
     elif price <= 300000:
         market_insight = "Fairly Priced"
-        market_icon = "🏠"
-        market_color = "fair"
+        market_icon    = "🏠"
+        market_color   = "fair"
     else:
         market_insight = "Premium Property"
-        market_icon = "🏰"
-        market_color = "premium"
+        market_icon    = "🏰"
+        market_color   = "premium"
 
-    # Suggestion
     if price < lower:
-        suggestion = "Great Deal — below market range"
+        suggestion      = "Great Deal — below market range"
         suggestion_icon = "🤑"
         suggestion_type = "deal"
     elif price <= upper:
-        suggestion = "Fair Price — within market range"
+        suggestion      = "Fair Price — within market range"
         suggestion_icon = "✅"
         suggestion_type = "fair"
     else:
-        suggestion = "Slightly Expensive — above market range"
+        suggestion      = "Slightly Expensive — above market range"
         suggestion_icon = "⚠️"
         suggestion_type = "expensive"
 
     return {
-        "range_lower": lower,
-        "range_upper": upper,
-        "range_lower_fmt": f"${lower:,.0f}",
-        "range_upper_fmt": f"${upper:,.0f}",
-        "market_insight": market_insight,
-        "market_icon": market_icon,
-        "market_color": market_color,
-        "suggestion": suggestion,
-        "suggestion_icon": suggestion_icon,
-        "suggestion_type": suggestion_type,
+        "range_lower":      lower,
+        "range_upper":      upper,
+        "range_lower_fmt":  f"${lower:,.0f}",
+        "range_upper_fmt":  f"${upper:,.0f}",
+        "market_insight":   market_insight,
+        "market_icon":      market_icon,
+        "market_color":     market_color,
+        "suggestion":       suggestion,
+        "suggestion_icon":  suggestion_icon,
+        "suggestion_type":  suggestion_type,
         "tips": [
             f"💰 Good deal if listed below {f'${lower:,.0f}'}",
             f"✅ Fair price between {f'${lower:,.0f}'} – {f'${upper:,.0f}'}",
@@ -608,23 +573,22 @@ class PredictionInput(BaseModel):
 
 
 class PredictionOutput(BaseModel):
-    predicted_price: float
-    formatted_price: str
-    model_name: str
-    confidence: str
-    location_impact: Optional[str] = None
-    # Recommendation fields
-    range_lower: float
-    range_upper: float
-    range_lower_fmt: str
-    range_upper_fmt: str
-    market_insight: str
-    market_icon: str
-    market_color: str
-    suggestion: str
-    suggestion_icon: str
-    suggestion_type: str
-    tips: List[str]
+    predicted_price:   float
+    formatted_price:   str
+    model_name:        str
+    confidence:        str
+    location_impact:   Optional[str] = None
+    range_lower:       float
+    range_upper:       float
+    range_lower_fmt:   str
+    range_upper_fmt:   str
+    market_insight:    str
+    market_icon:       str
+    market_color:      str
+    suggestion:        str
+    suggestion_icon:   str
+    suggestion_type:   str
+    tips:              List[str]
 
 
 # ========================
@@ -678,16 +642,15 @@ async def predict_price(input_data: PredictionInput):
             feature_array = scaler.transform(feature_array)
 
         base_prediction = model.predict(feature_array)[0]
-        prediction = max(0, base_prediction * location_multiplier)
+        prediction      = max(0, base_prediction * location_multiplier)
 
         formatted_price = f"${prediction:,.2f}"
-        confidence = "High" if prediction > 50000 else "Medium"
+        confidence      = "High" if prediction > 50000 else "Medium"
 
         location_type = input_data.features.get('location_type', 'suburban_standard')
         location_name = LOCATION_TYPES[location_type]['label']
         location_impact = f"Location ({location_name}): {location_multiplier}x"
 
-        # ✅ Compute recommendations
         rec = compute_recommendations(prediction)
 
         return PredictionOutput(
@@ -708,8 +671,8 @@ async def get_model_info():
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded")
     return {
-        "model_type": type(model).__name__,
-        "user_fields": USER_INPUT_FEATURES,
+        "model_type":     type(model).__name__,
+        "user_fields":    USER_INPUT_FEATURES,
         "location_types": list(LOCATION_TYPES.keys())
     }
 
@@ -727,8 +690,10 @@ async def startup_event():
     print(f"✅ User fields: {len(USER_INPUT_FEATURES)} high-impact features")
     print(f"✅ Location types: {len(LOCATION_TYPES)} universal categories")
     print(f"✅ Model features: {len(feature_names)} (auto-filled)")
+    print(f"ℹ️  Kitchen Quality fixed at: Average (3) — hidden from UI")
+    print(f"ℹ️  Stories fixed at: 2 — hidden from UI")
     print("="*80)
-    print("⭐ NEW: Price Range, Market Insight & Suggestions added!")
+    print("⭐ Price Range, Market Insight & Suggestions enabled!")
     print("="*80)
     print("🌐 http://127.0.0.1:8000")
     print("="*80 + "\n")
@@ -739,6 +704,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8000)),  # uses host's PORT env var
-        reload=False                              # never True in production
+        port=int(os.environ.get("PORT", 8000)),
+        reload=False
     )
