@@ -6,21 +6,17 @@ A machine learning web app that predicts house prices from property features. A 
 ![FastAPI](https://img.shields.io/badge/FastAPI-21262d?style=flat-square&logo=fastapi&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-21262d?style=flat-square&logo=scikitlearn&logoColor=white)
 
-![App screenshot](docs/screenshot.png)
-<!-- FILL IN: add a screenshot of the form and a prediction result at docs/screenshot.png -->
-
 ## Model
 
-| | |
-|---|---|
-| **Dataset** | [FILL IN: name, source link, number of rows and features] |
-| **Final model** | Gradient Boosting Regressor |
-| **Other models compared** | [FILL IN: e.g. Linear Regression, Random Forest] |
-| **R²** | [FILL IN] |
-| **RMSE** | [FILL IN] |
+The app serves a Gradient Boosting Regressor saved with `joblib`. An optional scaler is applied before prediction if one was used during training.
 
-Training and evaluation are in [`notebooks/training.ipynb`](notebooks/training.ipynb).
-<!-- FILL IN: add your training notebook to the repo and keep this link, or remove the line -->
+<!--
+When you have your real evaluation numbers, add a table here, for example:
+
+| Model | R² | RMSE |
+|---|---|---|
+| ... | ... | ... |
+-->
 
 ## How it works
 
@@ -34,7 +30,6 @@ Training and evaluation are in [`notebooks/training.ipynb`](notebooks/training.i
 house_price_app/
 ├── main.py              # FastAPI application
 ├── requirements.txt
-├── notebooks/           # Training and evaluation
 ├── saved_models/
 │   ├── best_model.pkl
 │   ├── scaler.pkl       # optional
